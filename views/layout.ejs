@@ -2,11 +2,13 @@
   <head>
     <meta content="width=device-width, initial-scale=1" name="viewport" />
     <title><%= title %></title>
-    <link rel="stylesheet" href="/css/home.css" />
+    <link rel="stylesheet" href="/css/layout.css" />
+    <%- style %>
   </head>
   <body>
     <%- include('partials/_header'); %>
      <%- body %> 
      <%- include('partials/_footer'); %>
+     <%- script %>
   </body>
 </html>
