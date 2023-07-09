@@ -1,22 +1,17 @@
 const User = require('../models/user');
 
-module.exports.profile = async (req, res)=> {
-    if(req.cookies.user_id) {
-        const existingUser = await User.findById(req.cookies.user_id);
-        if(existingUser) {
-            return res.render('user_profile', {
-                title: "User Profile"
-            });
-        } else {
-            return res.redirect('/users/sign-in');
-        }
-    } else {
-        return res.redirect('/users/sign-in');
-    }
+module.exports.profile = (req, res)=> {
+    return res.render('user_profile', {
+        title: 'User Profile',
+    });
 }
 
 // render Sign in Page
 module.exports.signIn = (req, res)=> {
+    if (req.isAuthenticated()){
+        return res.redirect('/users/profile');
+    }
+
     return res.render('user_sign_in', {
         title: "Codeial | Sign In"
     })
@@ -24,6 +19,10 @@ module.exports.signIn = (req, res)=> {
 
 // render Sign Up Page
 module.exports.signUp = (req, res)=> {
+    if (req.isAuthenticated()){
+        return res.redirect('/users/profile');
+    }
+
     return res.render('user_sign_up', {
         title: "Codeial | Sign Up"
     })
@@ -74,30 +73,18 @@ module.exports.create = async (req, res)=> {
 // For Creating Session and Cookies Store In Browser
 module.exports.createSession = async (req, res)=> {
     // Step To Authenticate
-    try {
-        const existingUser = await User.findOne({ email: req.body.email });  // Find The User
-
-        if(existingUser) {
-            // Checking password from Database 
-            if(existingUser.password != req.body.password) {
-                return res.redirect('back');
-            }
-
-            // Creating Session through Cookies
-            res.cookie('user_id', existingUser.id);
-            return res.redirect('/users/profile');
-        } else {
-            return res.redirect('back'); // When user not Found
-        }
-    } catch (err) {
-        console.log('Error During Sign-In!', err.message);
-        return;
-    }
+    return res.redirect('/');
 }
 
 // Destroying Session or Cookies
 module.exports.destroySession = (req, res) => {
-    res.clearCookie('user_id');
-    // console.log(req.cookies);
-    return res.redirect('/users/sign-in');
+    req.logout((err)=> {
+        if(err) {
+            console.log('Error in killing Session!')
+            return;
+        }
+        return res.redirect('/');
+    });
 }
+
+
