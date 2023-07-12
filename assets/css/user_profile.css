@@ -1,14 +1,11 @@
 body {
-    background-color: aqua;
-}
+  background-color: aqua; }
 
 .header {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 1rem auto;
-}
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 1rem auto; }
 
 p {
-    margin-bottom: 2rem;
-}
+  margin-bottom: 2rem; }
