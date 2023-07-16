@@ -1,5 +1,26 @@
+const Post = require('../models/post');
+const Comment = require('../models/comment');
+const User = require('../models/user');
 
+module.exports.home = async (req, res)=> {
+    try {
+        let posts = await Post.find({}).populate('user').populate({
+            path: 'comments',
+            populate: {
+                path: 'user'
+            }
+        });
 
-module.exports.home = (req, res)=> {
-    return res.render('home', {title : "Codeial App"});
+        let users = await User.find({});
+
+        return res.render('home', {
+            title: 'Codeial | Home',
+            posts: posts,
+            all_users: users,
+        });
+        
+    } catch (err) {
+        console.log('Error', err);
+        return;
+    }
 }

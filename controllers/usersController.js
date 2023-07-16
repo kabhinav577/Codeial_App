@@ -1,9 +1,30 @@
 const User = require('../models/user');
 
-module.exports.profile = (req, res)=> {
-    return res.render('user_profile', {
-        title: 'User Profile',
-    });
+module.exports.profile = async (req, res)=> {
+    try {
+        let user = await User.findById(req.params.id);
+        return res.render('user_profile', {
+            title: 'User Profile',
+            profile_user: user
+        });
+    } catch (err) {
+        console.log('Error', err);
+        return;
+    }
+}
+
+module.exports.update = async (req, res)=> {
+    if(req.user.id == req.params.id) {
+        try {
+            let user = await User.findById(req.params.id, req.body);
+            return res.redirect('back');
+        } catch (err) {
+            console.log('Error', err);
+            return;
+        }
+    } else {
+        return res.status(401).send("Unathorized");
+    }
 }
 
 // render Sign in Page
