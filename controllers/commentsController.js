@@ -1,20 +1,22 @@
-const Post = require('../models/post');
 const Comment = require('../models/comment');
+const Post = require('../models/post');
 
 module.exports.create = async (req, res)=> {
     try {
         let post = await Post.findById(req.body.post);
 
         if(post){
+            // console.log(req.user.id);
             let comment = await Comment.create({
                 content: req.body.content,
                 post: req.body.post,
-                user: req.body._id
+                user: req.user._id
             });
 
             post.comments.push(comment);
             post.save();
 
+            // console.log(req.body);
             return res.redirect('/');
         }
     } catch (err) {
@@ -30,9 +32,9 @@ module.exports.destroy = async(req, res)=> {
         if(comment.user == req.user.id) {
             let postId = comment.post;
 
-            comment.remove();
+            comment.deleteOne();
 
-            let post = Post.findByIdAndUpdate(postId, {
+            await Post.findByIdAndUpdate(postId, {
                 $pull: {comments: req.params.id}});
 
             return res.redirect('back');

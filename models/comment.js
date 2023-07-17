@@ -6,7 +6,6 @@ const commentSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    // Commnent belongs to a User
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
