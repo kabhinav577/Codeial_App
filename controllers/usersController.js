@@ -15,14 +15,11 @@ module.exports.profile = async (req, res)=> {
 
 module.exports.update = async (req, res)=> {
     if(req.user.id == req.params.id) {
-        try {
-            let user = await User.findById(req.params.id, req.body);
-            return res.redirect('back');
-        } catch (err) {
-            console.log('Error', err);
-            return;
-        }
+        let user = await User.findById(req.params.id, req.body);
+        req.flash('success', 'Profile Updated!')
+        return res.redirect('back');
     } else {
+        req.flash('error', 'Unauthorized!');
         return res.status(401).send("Unathorized");
     }
 }
@@ -51,41 +48,22 @@ module.exports.signUp = (req, res)=> {
 
 // Get the Sign up data
 module.exports.create = async (req, res)=> {
-    // Using .then() function -------->
-    // if(req.body.password != req.body.confirm_password){
-    //     return res.redirect('back');
-    // }
-
-    // User.findOne({email : req.body.email}).then((user)=> {
-    //     if(!user) {
-    //         User.create(req.body).then((user)=> {
-    //             return res.redirect('/users/sign-in');
-    //         }).catch((err)=> {
-    //             console.log('Error in Creating user while Sign up');
-    //             return;
-    //         })
-    //     }
-    // }).catch((err)=> {
-    //     console.log('Error in Finding user to Sign Up');
-    //     return;
-    // })
-    /// ---------------->
-
-    // Using Try Catch 
     try {
         if (req.body.password != req.body.confirm_password) {
+          req.flash('error', `Passwords doesn't not match`);
           return res.redirect('back');
         }
     
         const existingUser = await User.findOne({ email: req.body.email });
         if (!existingUser) {
-          const newUser = await User.create(req.body);
+          await User.create(req.body);
           return res.redirect('/users/sign-in');
         } else {
-            console.log('Email is Already Created!')
-            return;
+            req.flash('success', 'You have signed up, login to continue!');
+            return res.redirect('back');
         }
       } catch (err) {
+        req.flash('error', err);
         console.log('Error during Sign Up:', err.message);
         return;
       }
@@ -93,7 +71,7 @@ module.exports.create = async (req, res)=> {
 
 // For Creating Session and Cookies Store In Browser
 module.exports.createSession = async (req, res)=> {
-    // Step To Authenticate
+    req.flash('success', 'Logged in Successfully!');
     return res.redirect('/');
 }
 
@@ -101,9 +79,11 @@ module.exports.createSession = async (req, res)=> {
 module.exports.destroySession = (req, res) => {
     req.logout((err)=> {
         if(err) {
+            req.flash('error', err);
             console.log('Error in killing Session!')
             return;
         }
+        req.flash('success', 'You have logged out!');
         return res.redirect('/');
     });
 }
