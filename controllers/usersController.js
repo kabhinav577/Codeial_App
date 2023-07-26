@@ -1,4 +1,6 @@
 const User = require('../models/user');
+const fs = require('fs');
+const path = require('path');
 
 module.exports.profile = async (req, res)=> {
     try {
@@ -15,9 +17,38 @@ module.exports.profile = async (req, res)=> {
 
 module.exports.update = async (req, res)=> {
     if(req.user.id == req.params.id) {
-        let user = await User.findById(req.params.id, req.body);
-        req.flash('success', 'Profile Updated!')
-        return res.redirect('back');
+        try {
+            let user = await User.findById(req.params.id);
+
+            User.uploadedAvatar(req, res, function(err) {
+                if(err) {
+                    console.log('Multer Error: ', err); return;
+                }
+
+                user.name = req.body.name;
+                user.email = req.body.email;
+
+                if(req.file) {
+
+                    if(user.avatar) {
+                        const curAvatarPath = path.join(__dirname, '..', user.avatar);
+                        if(fs.existsSync(curAvatarPath)) {
+                            fs.unlinkSync(curAvatarPath);
+                        }
+                    }
+
+                    // this is saving the path of the uploaded file into the avatar field in the user
+                    user.avatar = User.avatarPath + '/' + req.file.filename;
+                }
+
+                user.save();
+                req.flash('success', 'Profile Updated!👍')
+                return res.redirect('back');
+            });
+        } catch (err) {
+            req.flash('error', err);
+            return res.redirect('back');
+        }
     } else {
         req.flash('error', 'Unauthorized!');
         return res.status(401).send("Unathorized");
@@ -50,7 +81,7 @@ module.exports.signUp = (req, res)=> {
 module.exports.create = async (req, res)=> {
     try {
         if (req.body.password != req.body.confirm_password) {
-          req.flash('error', `Passwords doesn't not match`);
+          req.flash('error', `Passwords doesn't not match😭`);
           return res.redirect('back');
         }
     
@@ -71,7 +102,7 @@ module.exports.create = async (req, res)=> {
 
 // For Creating Session and Cookies Store In Browser
 module.exports.createSession = async (req, res)=> {
-    req.flash('success', 'Logged in Successfully!');
+    req.flash('success', 'Logged in Successfully!👍');
     return res.redirect('/');
 }
 
@@ -83,7 +114,7 @@ module.exports.destroySession = (req, res) => {
             console.log('Error in killing Session!')
             return;
         }
-        req.flash('success', 'You have logged out!');
+        req.flash('success', 'You have logged out!😝');
         return res.redirect('/');
     });
 }
